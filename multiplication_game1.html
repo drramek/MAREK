@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .option {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: yellow;
+            border: none;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+        .option:hover {
+            background-color: orange;
+            transform: scale(1.1);
+        }
+        .result {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .wrong {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Multiplication Game</h1>
+    <h2 id="question"></h2>
+    <div id="options"></div>
+    <p class="result" id="result"></p>
+    <button onclick="startGame()">Restart Game</button>
+    
+    <audio id="correctSound" src="correct.mp3"></audio>
+    <audio id="wrongSound" src="wrong.mp3"></audio>
+    
+    <script>
+        let score = 0;
+        let questionCount = 0;
+        const totalQuestions = 10;
+        
+        function generateQuestion() {
+            if (questionCount >= totalQuestions) {
+                document.getElementById('question').innerText = `Game Over! You scored ${score} / ${totalQuestions}`;
+                document.getElementById('options').innerHTML = '';
+                return;
+            }
+            
+            let a = Math.floor(Math.random() * 10) + 1;
+            let b = Math.floor(Math.random() * 10) + 1;
+            let correctAnswer = a * b;
+            let answers = new Set([correctAnswer]);
+            
+            while (answers.size < 3) {
+                answers.add(Math.floor(Math.random() * 100));
+            }
+            
+            document.getElementById('question').innerText = `What is ${a} × ${b}?`;
+            
+            let optionsHTML = '';
+            Array.from(answers).sort(() => Math.random() - 0.5).forEach(answer => {
+                optionsHTML += `<button class='option' onclick='checkAnswer(${answer}, ${correctAnswer}, this)'>${answer}</button>`;
+            });
+            
+            document.getElementById('options').innerHTML = optionsHTML;
+        }
+        
+        function checkAnswer(selected, correct, element) {
+            let resultText = selected === correct 
+                ? `🎉 Correct! ${correct} is the right answer!`
+                : `❌ Wrong! The correct answer was ${correct}. Keep going!`;
+            
+            if (selected === correct) {
+                score++;
+                document.getElementById("correctSound").play();
+                element.style.backgroundColor = "lightgreen";
+            } else {
+                document.getElementById("wrongSound").play();
+                element.style.backgroundColor = "lightcoral";
+            }
+            
+            element.style.transform = "scale(1.2)";
+            setTimeout(() => {
+                element.style.transform = "scale(1.0)";
+                element.style.backgroundColor = "yellow";
+            }, 500);
+            
+            questionCount++;
+            document.getElementById('result').innerHTML = `<span class="${selected === correct ? 'correct' : 'wrong'}">${resultText}</span>`;
+            
+            setTimeout(() => {
+                document.getElementById('result').innerText = '';
+                generateQuestion();
+            }, 1000);
+        }
+        
+        function startGame() {
+            score = 0;
+            questionCount = 0;
+            document.getElementById('result').innerText = '';
+            generateQuestion();
+        }
+        
+        window.onload = startGame;
+    </script>
+</body>
+</html>
